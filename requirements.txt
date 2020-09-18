@@ -16,5 +16,6 @@ simplejson
 scipy
 sklearn
 statsmodels
+gunicorn
 seaborn
 git+git://github.com/mpld3/mpld3@master#egg=mpld3
