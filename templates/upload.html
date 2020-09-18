@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="https://mpld3.github.io/js/mpld3.v0.2.js"></script>
+
+    <title>The Pocket Appraiser</title>
+
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{url_for('static', filename='main.js')}}"></script>
+
+</head>
+
+<body>
+<h1 align="center"> WELCOME TO THE POCKET APPRAISER</h1>
+<h2 align="center"> Upload your file to generate report</h2>
+<h2 align="center">                                    </h2>
+
+
+<div align="center">
+<form method="POST" enctype="multipart/form-data">
+    <input type=file name=file>
+    <input type=submit value=Upload>
+</form>
+</div>
+<p style="text-align: center;"> <a href="javascript:showhide('uniquename')" >Click to generate report</a></p>
+<div class="indented" align="center" id="uniquename" style="display:none;">
+    <div align="center"><h2> Here are some general statistics of the uploaded file:</h2></div>
+    <div align="center"> Average Seller Concession: ${{ AverageSellerConcessionAmount|safe }} </div>
+    <div align="center"> Mean Seller Concession Percentage: {{ AverageSellerConcessionPercent|safe }} %</div>
+    <div align="center"> Percentage of Sales with Seller Concessions: {{ PercentageofDSaleswithSellerConcessions|safe }} %</div>
+    <div align="center"> Median Seller Concession: ${{ MedianSellerConcessionAmount|safe }} </div>
+    <div align="center"> <h2>Based on the uploaded properties, following features were found to affect property values the most: </h2></div>
+    <!--Create Summary table-->
+    <div align="center">
+    {% for table in tables %}
+        {{ table|safe }}
+    {% endfor %}
+    </div>
+
+    <!--Create scatter plot-->
+    <div align="center" id="fig01"></div>
+    <div align="center" id="fig02"></div>
+    <div align="center" id="fig03"></div>
+    <div align="center" id="fig04"></div>
+    <div align="center" id="json_bar1"></div>
+    <div align="center" id="json_bar2"></div>
+    <div align="center" id="json_bar3"></div>
+    <div align="center" id="json_h1"></div>
+    <div align="center" id="json_h2"></div>
+    <div align="center" id="json_hm"></div>
+
+</div>
+
+
+<script type="text/javascript">
+  var json01 = {{ json01|safe }};
+  var json02 = {{ json02|safe }};
+  var json03 = {{ json03|safe }};
+  var json04 = {{ json04|safe }};
+  var json_h1 = {{ json_h1|safe }};
+  var json_h2 = {{ json_h2|safe }};
+  var json_bar1 = {{ json_bar1|safe }};
+  var json_bar2 = {{ json_bar2|safe }};
+  var json_bar3 = {{ json_bar3|safe }};
+  var json_hm = {{ json_hm|safe }};
+
+  mpld3.draw_figure("fig01", json01);
+  mpld3.draw_figure("fig02", json02);
+  mpld3.draw_figure("fig03", json03);
+  mpld3.draw_figure("fig04", json04);
+  mpld3.draw_figure("json_h1", json_h1);
+  mpld3.draw_figure("json_h2", json_h2);
+  mpld3.draw_figure("json_bar1", json_bar1);
+  mpld3.draw_figure("json_bar2", json_bar2);
+  mpld3.draw_figure("json_bar3", json_bar3);
+  mpld3.draw_figure("json_hm", json_hm);
+
+</script>
+
+<!--<a href="javascript:showhide('uniquename')">Click to see file summary.</a>-->
+
+<h4 align="center" onclick="window.print();"> Print Report </h4>
+</body>
+</html>
