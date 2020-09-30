@@ -24,10 +24,10 @@
 <div align="center">
 <form method="POST" enctype="multipart/form-data">
     <input type=file name=file>
-    <input type=submit value=Upload onsubmit="showhide('uniquename');">
+    <input type=submit value=Upload>
 </form>
 </div>
-<!--<p style="text-align: center;"> <a href="javascript:showhide('uniquename')" ><button>Click to generate report</button></a></p>-->
+<p style="text-align: center;"> <a href="javascript:showhide('uniquename')" ><button>Click to generate report</button></a></p>
 <div class="indented" align="center" id="uniquename" style="display:none;">
     <div align="center"><h2> Here are some general statistics of the uploaded file:</h2></div>
     <div align="center"> Percentage of Distressed Sales: ${{ PercentageofDistressedSales|safe }} </div>
