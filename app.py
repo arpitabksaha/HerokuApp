@@ -1,5 +1,6 @@
 from flask import Flask,request, render_template
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 import mpld3
 import simplejson as json
@@ -15,9 +16,8 @@ import statistics
 
 app = Flask(__name__)
 
-#Notes - 3)Add bar chart 4) Build heatmap from cor_data
-#variable               variable2  correlation correlation_label(imp)
-#1   ClosePrice                 Acreage    -0.101379             -0.10
+#Notes - 1) Modify heat map
+# 2) Add stats table with hide property
 
 
 
@@ -49,6 +49,10 @@ def upload():
         df_clean = df_clean.dropna(axis=1, how='all')
         #print(df_clean.columns)
         #print(cat_df)
+
+        # calculating percentage of distresses sales
+        percentageofDistressedCount = df.apply(lambda x: True if x['Ownership'] != "Private - Owned" else False,axis=1)
+        PercentageofDistressedSales = round(100 * (len(percentageofDistressedCount[percentageofDistressedCount == True].index)) / (len(df.index) - 1))
 
         # calculating percentage of sales with seller concessions
         percentageofSaleswithSellercount = df.apply(lambda x: True if x['SellerConcessionYN'] == True else False,axis=1)
@@ -173,8 +177,8 @@ def upload():
         cor_datatable_sig.rename(columns={'Rangecorr': 'Tweak Amount'}, inplace=True)
         Combined_table = Combined_table[['Features', 'Adjusted Tweak Amount']]
         Combined_table['Adjusted Tweak Amount'] = '$' + Combined_table['Adjusted Tweak Amount'].astype(str)
+        Combined_table['Features'] = Combined_table['Features'].replace(['EstFinAbvGrdSqFt','YearRemodeled','BathsFull','BathsHalf','GarageYN','YearBuilt','Acreage'],['Reported Living Area','Year Remodeled','Number of Full Bathrooms','Number of Half Bathrooms','Garage Count','Year Built','Reported Site Size(ac)'])
         Combined_table.set_index('Features', inplace=True)
-
         #print(Combined_table)
         #cor_data.set_index('variable',inplace=True)
 
@@ -185,7 +189,8 @@ def upload():
         y1 = df_clean.ClosePrice
         slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(x1, y1)
         sns.regplot(x="EstFinAbvGrdSqFt", y="ClosePrice", data=df_clean,ax=ax1,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
-
+        sns.regplot(x="EstFinAbvGrdSqFt", y="ClosePrice", data=df_clean,ax=ax1,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
+        plt.xlim(min(df_clean['EstFinAbvGrdSqFt'])-50, max(df_clean['EstFinAbvGrdSqFt'])+50)
         #est = sm.OLS(y1CI, x1CI)
         #est2 = est.fit()
         #ci1 = est2.conf_int(alpha=0.05, cols=None)
@@ -197,7 +202,7 @@ def upload():
         #ax1.fill_between(x1CI, (y1CI - ci1[0][0]), (y1CI + ci1[0][1]), color='b', alpha=.1)
         ax1.grid(color='lightgrey', linestyle='solid')
         ax1.set_xlabel("Reported Living Area(SF)", fontsize=15)
-        ax1.set_ylabel("Reported Sales Price($)", fontsize=15)
+        ax1.set_ylabel("Reported Closing Price($)", fontsize=15)
         ax1.set_title("Scatter Plot for Reported Living Area and Reported Sales Price", size=20)
         #sns.lineplot(data=df_clean, x="EstFinAbvGrdSqFt", y="ClosePrice", ax=ax1)
         json01 = json.dumps(mpld3.fig_to_dict(fig1))
@@ -207,7 +212,8 @@ def upload():
         y2 = df_clean.ClosePrice
         slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(x2, y2)
         sns.regplot(x="Acreage", y="ClosePrice", data=df_clean,ax=ax2,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
-
+        sns.regplot(x="Acreage", y="ClosePrice", data=df_clean,ax=ax2,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
+        plt.xlim(min(df_clean['Acreage']) - 0.01, max(df_clean['Acreage']) + 0.01)
 
         #scatter2 = ax2.scatter(x2, y2)
         #line2 = slope2 * x2 + intercept2
@@ -215,7 +221,7 @@ def upload():
         ax2.legend()
         ax2.grid(color='lightgrey', linestyle='solid')
         ax2.set_xlabel("Reported Site Size (ac)", fontsize=15)
-        ax2.set_ylabel("Reported Sales Price($)", fontsize=15)
+        ax2.set_ylabel("Reported Closing Price($)", fontsize=15)
         ax2.set_title("Scatter Plot for Reported Site Size (ac) and Reported Sales Price", size=20)
         json02 = json.dumps(mpld3.fig_to_dict(fig2))
 
@@ -224,7 +230,8 @@ def upload():
         y3 = df_clean.ClosePrice
         slope3, intercept3, r_value3, p_value3, std_err3 = stats.linregress(x3, y3)
         sns.regplot(x="YearBuilt", y="ClosePrice", data=df_clean, ax=ax3,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
-
+        sns.regplot(x="YearBuilt", y="ClosePrice", data=df_clean, ax=ax3,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
+        plt.xlim(min(df_clean['YearBuilt']) - 1, max(df_clean['YearBuilt']) + 1)
 
         #scatter3 = ax3.scatter(x3, y3)
         #line3 = slope3 * x3 + intercept3
@@ -232,7 +239,7 @@ def upload():
         ax3.legend()
         ax3.grid(color='lightgrey', linestyle='solid')
         ax3.set_xlabel("Year Built", fontsize=15)
-        ax3.set_ylabel("Reported Sales Price($)", fontsize=15)
+        ax3.set_ylabel("Reported Closing Price($)", fontsize=15)
         ax3.set_title("Scatter Plot for Seller Concession Amount and Reported Sales Price", size=20)
         json03 = json.dumps(mpld3.fig_to_dict(fig3))
 
@@ -241,6 +248,10 @@ def upload():
         y4 = df_clean.ClosePrice
         slope4, intercept4, r_value4, p_value4, std_err4 = stats.linregress(x4, y4)
         sns.regplot(x="YearRemodeled", y="ClosePrice", data=df_clean, ax=ax4,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
+        sns.regplot(x="YearRemodeled", y="ClosePrice", data=df_clean, ax=ax4,truncate=True, scatter_kws={"color": "#1A5276"}, line_kws={"color": "red","alpha":1});
+        #print(min(df_clean['YearRemodeled']))
+        #print(max(df_clean['YearRemodeled']))
+        #plt.xlim(min(df_clean['YearRemodeled']) - 1, max(df_clean['YearRemodeled']) + 1)
 
         #scatter4 = ax4.scatter(x4, y4)
         #line4 = slope4 * x4 + intercept4
@@ -248,7 +259,7 @@ def upload():
         ax4.legend()
         ax4.grid(color='lightgrey', linestyle='solid')
         ax4.set_xlabel("Year Remodeled", fontsize=15)
-        ax4.set_ylabel("Reported Sales Price($)", fontsize=15)
+        ax4.set_ylabel("Reported Closing Price($)", fontsize=15)
         ax4.set_title("Scatter Plot for Year Remodeled and Reported Sales Price", size=20)
         json04 = json.dumps(mpld3.fig_to_dict(fig4))
 
@@ -262,7 +273,8 @@ def upload():
         #print(df_clean['BathsFull'])
         plt.xticks([0.0,1.0,2.0,3.0,4.0])
         plt.xlabel("Number of Full Bathrooms")
-        plt.ylabel("Reported Sales Price($)")
+        plt.ylabel("Reported Closing Price($)")
+        #ax_bar1.set_title("Full Baths v. Reported Sales Price", size=20)
         fig_bar1 = ax_bar1[0].figure
         json_bar1 = json.dumps(mpld3.fig_to_dict(fig_bar1))
         #bar_chart = mpld3.fig_to_html(fig_bar1)
@@ -277,7 +289,8 @@ def upload():
         ax_bar2 = plt.bar(keys2, values2, width=0.5)
         plt.xticks([0.0, 1.0, 2.0, 3.0, 4.0])
         plt.xlabel("Number of Half Bathrooms")
-        plt.ylabel("Reported Sales Price($)")
+        plt.ylabel("Reported Closing Price($)")
+        #ax_bar2.set_title("Half Baths v. Reported Sales Price", size=20)
         fig_bar2 = ax_bar2[0].figure
         json_bar2 = json.dumps(mpld3.fig_to_dict(fig_bar2))
 
@@ -287,7 +300,8 @@ def upload():
         ax_bar3 = plt.bar(keys3, values3, width=0.5)
         plt.xticks([0.0, 1.0, 2.0, 3.0, 4.0])
         plt.xlabel("Number of Bedrooms")
-        plt.ylabel("Reported Sales Price($)")
+        plt.ylabel("Reported Closing Price($)")
+        #ax_bar3.set_title("Bedroom count v. Reported Sales Price", size=20)
         fig_bar3 = ax_bar3[0].figure
         json_bar3 = json.dumps(mpld3.fig_to_dict(fig_bar3))
 
@@ -296,12 +310,19 @@ def upload():
         mean = df_clean['ClosePrice'].mean()
         ax_h1 = sns.distplot(df_clean.ClosePrice)
         ax_h1.axvline(mean, color='r', linestyle='-')
+        ax_h1.set_xlabel("Reported Sales Price($)", fontsize=15)
+        ax_h1.set_ylabel("")
+        ax_h1.set_title("Sales Price Distribution", size=20)
         json_h1 = json.dumps(mpld3.fig_to_dict(fig_h1))
 
         fig_h2, ax_h2 = plt.subplots()
         mean2 = df_clean['EstFinAbvGrdSqFt'].mean()
-        ax_h2 = sns.distplot(df_clean.EstFinAbvGrdSqFt)
+        ax_h2 = sns.distplot(df_clean.EstFinAbvGrdSqFt,label="mean2")
         ax_h2.axvline(mean2, color='r', linestyle='-')
+        ax_h2.set_xlabel("Reported Living Area (SF)", fontsize=15)
+        ax_h2.set_ylabel("")
+        ax_h1.legend(['mean:',mean2])
+        ax_h2.set_title("Size Distribution", size=20)
         json_h2 = json.dumps(mpld3.fig_to_dict(fig_h2))
 
         #heatmap
@@ -318,16 +339,19 @@ def upload():
         im = ax_hm.imshow(result.values)
         #ax_hm.set_xticklabels(column_labels)
         #ax_hm.set_yticklabels(row_labels)
-        plt.setp(ax_hm.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
-        fig_hm.tight_layout()
-
+        #plt.setp(ax_hm.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
+        #fig_hm.tight_layout()
+        ax_hm.xaxis.set_major_formatter(plt.NullFormatter())
+        ax_hm.yaxis.set_major_formatter(plt.NullFormatter())
         print((np.array(result.values[0]))[0])
         print(result.values[0,0])
 
-
-
-
-        ax_hm.pcolor(result.values, cmap=plt.cm.Reds)
+        #ax_hm.remove()
+        ax_hm.pcolormesh(result.values, cmap=plt.cm.Reds)
+        #ax_hm.remove()
+        #rc = {"axes.spines.left": False,
+              #"ytick.left": False}
+        #plt.rcParams.update(rc)
         #ax_hm.set_xticks(np.arange(result.shape[0]) + 0.5, minor=False)
         #ax_hm.set_yticks(np.arange(result.shape[1]) + 0.5, minor=False)
         #ax_hm.set_frame_on(False)
@@ -347,7 +371,7 @@ def upload():
 
         #summary.to_html(classes='male')
 
-        return render_template('upload.html', tables=[Combined_table.to_html(classes='male')], json01=json01, json02=json02, json03=json03, json04=json04, json_h1=json_h1,json_h2=json_h2,json_bar1=json_bar1,json_bar2=json_bar2,json_bar3=json_bar3,json_hm=json_hm, PercentageofDSaleswithSellerConcessions=PercentageofDSaleswithSellerConcessions, AverageSellerConcessionAmount=AverageSellerConcessionAmount,AverageSellerConcessionPercent=AverageSellerConcessionPercent,MedianSellerConcessionAmount=MedianSellerConcessionAmount)
+        return render_template('upload.html', tables=[Combined_table.to_html(classes='male')], json01=json01, json02=json02, json03=json03, json04=json04, json_h1=json_h1,json_h2=json_h2,json_bar1=json_bar1,json_bar2=json_bar2,json_bar3=json_bar3,json_hm=json_hm,PercentageofDistressedSales=PercentageofDistressedSales, PercentageofDSaleswithSellerConcessions=PercentageofDSaleswithSellerConcessions, AverageSellerConcessionAmount=AverageSellerConcessionAmount,AverageSellerConcessionPercent=AverageSellerConcessionPercent,MedianSellerConcessionAmount=MedianSellerConcessionAmount)
     return render_template('upload.html')
 
 

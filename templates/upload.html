@@ -16,6 +16,7 @@
 
 <body>
 <h1 align="center"> WELCOME TO THE POCKET APPRAISER</h1>
+<h4 align="center" onclick="window.print();"><button>Print Report</button></h4>
 <h2 align="center"> Upload your file to generate report</h2>
 <h2 align="center">                                    </h2>
 
@@ -23,12 +24,13 @@
 <div align="center">
 <form method="POST" enctype="multipart/form-data">
     <input type=file name=file>
-    <input type=submit value=Upload>
+    <input type=submit value=Upload onsubmit="showhide('uniquename');">
 </form>
 </div>
-<p style="text-align: center;"> <a href="javascript:showhide('uniquename')" >Click to generate report</a></p>
+<!--<p style="text-align: center;"> <a href="javascript:showhide('uniquename')" ><button>Click to generate report</button></a></p>-->
 <div class="indented" align="center" id="uniquename" style="display:none;">
     <div align="center"><h2> Here are some general statistics of the uploaded file:</h2></div>
+    <div align="center"> Percentage of Distressed Sales: ${{ PercentageofDistressedSales|safe }} </div>
     <div align="center"> Average Seller Concession: ${{ AverageSellerConcessionAmount|safe }} </div>
     <div align="center"> Mean Seller Concession Percentage: {{ AverageSellerConcessionPercent|safe }} %</div>
     <div align="center"> Percentage of Sales with Seller Concessions: {{ PercentageofDSaleswithSellerConcessions|safe }} %</div>
@@ -41,6 +43,8 @@
     {% endfor %}
     </div>
 
+    <div align="center"> <h2>The better the correlation between a feature & home value, the darker the color.</h2></div>
+    <div align="center" id="json_hm"></div>
     <!--Create scatter plot-->
     <div align="center" id="fig01"></div>
     <div align="center" id="fig02"></div>
@@ -51,7 +55,6 @@
     <div align="center" id="json_bar3"></div>
     <div align="center" id="json_h1"></div>
     <div align="center" id="json_h2"></div>
-    <div align="center" id="json_hm"></div>
 
 </div>
 
@@ -83,6 +86,5 @@
 
 <!--<a href="javascript:showhide('uniquename')">Click to see file summary.</a>-->
 
-<h4 align="center" onclick="window.print();"> Print Report </h4>
 </body>
 </html>
